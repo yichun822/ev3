@@ -11,17 +11,20 @@ import time
 # This program requires LEGO EV3 MicroPython v2.0 or higher.
 # Click "Open user guide" on the EV3 extension tab for more information.
 ev3 = EV3Brick()
+#左右超声波探测
 left_sound_sensor=UltrasonicSensor(Port.S3)
 right_sound_sensor=UltrasonicSensor(Port.S4)
+#射击系统马达
 targeting_motor=Motor(Port.A)
+#定义左右轮
 left_motor = Motor(Port.B)
 right_motor = Motor(Port.C)
 
-
+#定义左右巡线红外传感器
 left_line_sensor = ColorSensor(Port.S1)
 right_line_sensor = ColorSensor(Port.S2)
 
-robot = DriveBase(left_motor, right_motor, wheel_diameter=55.5, axle_track=104)
+robot = DriveBase(left_motor, right_motor, wheel_diameter=55.5, axle_track=104)#这一行是遗留代码，本身无用
 
 timenow=time.time()-1
 # timenow=0
@@ -29,7 +32,7 @@ BLACK = 9
 WHITE = 85
 threshold = (BLACK + WHITE) / 2
 glonum=0
-
+#用于识别标靶并射击，我知道这个逻辑写的很乱，但是真的没精力优化了
 def sound(popnum,lstpop):
     global timepop
     global timenow
@@ -75,7 +78,7 @@ def sound(popnum,lstpop):
         
         
         
-            
+#基于DPI算法的双寻路系统            
 def xun(speed=100,kp=1.5,ki=0.001 ,kd=3,popnum=6,lstpop=[2,3,4,5]):
     global timenow
     DRIVE_SPEED = speed
@@ -105,6 +108,7 @@ def xun(speed=100,kp=1.5,ki=0.001 ,kd=3,popnum=6,lstpop=[2,3,4,5]):
         
         # You can wait for a short time or do other things in this loop.
         wait(10)
+        #双黑时减速
         if left_line_sensor.reflection() < 15 and right_line_sensor.reflection() < 15 :
             left_motor.run(0)
             right_motor.run(0)
@@ -117,6 +121,6 @@ def xun(speed=100,kp=1.5,ki=0.001 ,kd=3,popnum=6,lstpop=[2,3,4,5]):
         last = deviation 
         if n==1:
             break
-lstpop=[2,3,4,5,6]
-popnum=6
+lstpop=[2,3,4,5,6]#射击标靶序号
+popnum=6#标靶总量
 xun(300,4,0.001,3,popnum,lstpop)
