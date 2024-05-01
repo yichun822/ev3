@@ -78,7 +78,7 @@ def sound(popnum,lstpop):
         
         
         
-#基于DPI算法的双寻路系统            
+#基于PID算法的双寻路系统            
 def xun(speed=100,kp=1.5,ki=0.001 ,kd=3,popnum=6,lstpop=[2,3,4,5]):
     global timenow
     DRIVE_SPEED = speed
@@ -106,8 +106,8 @@ def xun(speed=100,kp=1.5,ki=0.001 ,kd=3,popnum=6,lstpop=[2,3,4,5]):
         # timenow=time.time()
         n=sound(popnum,lstpop)
         
-        # You can wait for a short time or do other things in this loop.
-        wait(10)
+        # # You can wait for a short time or do other things in this loop.
+        # wait(10)
         #双黑时减速
         if left_line_sensor.reflection() < 15 and right_line_sensor.reflection() < 15 :
             left_motor.run(0)
