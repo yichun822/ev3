@@ -18,8 +18,8 @@ left_motor = Motor(Port.B)
 right_motor = Motor(Port.C)
 
 
-color1 = ColorSensor(Port.S1)
-color2 = ColorSensor(Port.S2)
+left_line_sensor = ColorSensor(Port.S1)
+right_line_sensor = ColorSensor(Port.S2)
 
 robot = DriveBase(left_motor, right_motor, wheel_diameter=55.5, axle_track=104)
 
@@ -29,7 +29,7 @@ BLACK = 9
 WHITE = 85
 threshold = (BLACK + WHITE) / 2
 glonum=0
-#用于识别标靶并射击，我知道这个逻辑写的很乱，但是真的没精力优化了
+
 def sound(popnum,lstpop):
     global timepop
     global timenow
@@ -61,6 +61,8 @@ def sound(popnum,lstpop):
         if glonum not in lstpop:
             return 0
         ev3.speaker.beep()
+        # while left_sound_sensor.distance()<150 or right_sound_sensor.distance()<150:
+        #     continue
         left_motor.run(0)
         right_motor.run(0)
         if normal=='left':
@@ -70,31 +72,41 @@ def sound(popnum,lstpop):
             targeting_motor.run_angle(500,-400)
             targeting_motor.run_angle(500,400)
 
-def pid_line_follow(kp, ki, kd, max_speed,popnum,lstpop):
-    #pid = PIDController(kp, ki, kd, setpoint)  # 创建PID控制器实例
-    integral = 0
-    derivative = 0
-    prev_error = 0
-
-    while True:
-        s1 = color1.reflection()  # 假设color1是一个传感器对象，获取传感器反射值
-        s2 = color2.reflection()  # 假设color2是另一个传感器对象，获取传感器反射值
-        error = s1 - s2  # 计算反射值差异作为误差
-        integral += error  # 计算积分项
-        derivative = error - prev_error  # 计算微分项
-        turn = kp * error + ki * integral + kd * derivative  # 计算总的控制输出
-        prev_error = error  # 更新上一次误差
-        #turn = pid.update(error)  # 使用PID控制器更新转向控制输出
         
-        # 根据PID输出调整机器人速度和转向
-        left_motor.run(max_speed + turn)  # 左轮速度
-        right_motor.run(max_speed - turn)  # 右轮速度
+        
+        
+            
+def xun(speed=100,kp=1.5,ki=0.001 ,kd=3,popnum=6,lstpop=[2,3,4,5]):
+    global timenow
+    DRIVE_SPEED = speed
+    i=0
+    last=0
+    d=0
+
+    # PROPORTIONAL_GAIN = gain
+
+    # Start following the line endlessly.
+    while True:
+        s1 = left_line_sensor.reflection()
+        s2 = right_line_sensor.reflection()
+        # Calculate the deviation from the threshold.
+        deviation = left_line_sensor.reflection() - right_line_sensor.reflection()
+        
+        # Calculate the turn rate.
+        # turn_rate = PROPORTIONAL_GAIN * deviation
+        i+=deviation
+        d=deviation-last
+        turn=(deviation*kp)+(i*ki)+(d*kd)
+        left_motor.run(speed+turn)
+        right_motor.run(speed-turn)
+        # Set the drive base speed and turn rate.
+        # robot.drive(DRIVE_SPEED, turn_rate)
         # timenow=time.time()
         n=sound(popnum,lstpop)
         
         # You can wait for a short time or do other things in this loop.
         #wait(10)
-        if s1 < 15 and s2 < 15 :
+        if left_line_sensor.reflection() < 15 and right_line_sensor.reflection() < 15 :
             left_motor.run(0)
             right_motor.run(0)
             for i in range(45):
@@ -103,15 +115,10 @@ def pid_line_follow(kp, ki, kd, max_speed,popnum,lstpop):
             
             # left_motor.run_time(500, 70)
             # right_motor.run_time(500, 70)
-        #last = deviation 
+        last = deviation 
         if n==1:
             break
 lstpop=[2,3,4,5,6]
 popnum=6
-kp = 4  # 适当的比例系数
-ki = 0.0001  # 适当的积分系数
-kd = 8  # 适当的微分系数
-setpoint = 30  # 适当的目标反射值
-max_speed = 200  # 适当的最大速度
-pid_line_follow(kp, ki, kd, max_speed,popnum,lstpop)
+xun(200,8,0.0001,15,popnum,lstpop)
 

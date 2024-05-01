@@ -1,0 +1,11 @@
+list=[]
+list2=[2,1,3]
+list3=[]
+for i in range(1,4)
+    return list
+list=[1,2,3]
+def cmp(list,list2):
+    if list[0] == list2[0]
+        return list3[0]
+    
+
